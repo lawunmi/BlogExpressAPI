@@ -1,9 +1,8 @@
 import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/response.js";
-import cloudinary from "../utils/cloudinary.js";
-import fs from "fs/promises";
 import jwt from "jsonwebtoken";
+import { imageUpload } from "../helpers/mediaHelper.js";
 
 const createUser = async (req, res, next) => {
   try {
@@ -91,7 +90,7 @@ const loginUser = async (req, res, next) => {
     const token = jwt.sign(
       { id: user._id, admin: user.isAdmin },
       process.env.JWT_SECRET,
-      { expiresIn: "2h" }
+      { expiresIn: "4w" }
     );
 
     // Exclude certain fields from response
@@ -165,7 +164,7 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
-const getUserById = async (req, res) => {
+const getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const user = await userModel.findById(id, "-password -__v");
@@ -176,16 +175,6 @@ const getUserById = async (req, res) => {
   } catch (error) {
     next(error);
   }
-};
-
-// Function for image upload
-const imageUpload = async (file) => {
-  const response = await cloudinary.uploader.upload(file.path, {
-    folder: "Profile-Pics",
-  });
-  const imgUrl = response.secure_url;
-  await fs.unlink(file.path);
-  return imgUrl;
 };
 
 export { createUser, loginUser, updateUser, getAllUsers, getUserById };
