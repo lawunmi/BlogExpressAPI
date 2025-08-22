@@ -1,7 +1,8 @@
 import postModel from "../models/post.model.js";
 import userModel from "../models/user.model.js";
+import commentModel from "../models/comment.model.js";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/response.js";
-import { postMedia } from "../helpers/mediaHelper.js";
+import { postMedia } from "../utils/mediaUtil.js";
 
 const createPost = async (req, res, next) => {
   try {
@@ -37,20 +38,10 @@ const updatePost = async (req, res, next) => {
   try {
     const id = req.user.id;
     const { postId } = req.params;
-    const { title, content } = req.body;
+    const payload = req.body;
     const files = req.files;
 
     //console.log("postId: ", postId);
-
-    const payload = {};
-
-    if (title !== undefined && title.trim() !== "") {
-      payload.title = title.trim();
-    }
-
-    if (content !== undefined && content.trim() !== "") {
-      payload.content = content.trim();
-    }
 
     const post = await postModel.findById(postId);
     //console.log("post: ", post);
@@ -74,7 +65,7 @@ const updatePost = async (req, res, next) => {
     const updatedPost = await postModel.findByIdAndUpdate(
       postId,
       { postMedia: postUrl, ...payload },
-      { new: true }
+      { new: true, runValidators: true }
     );
     return sendSuccessResponse(res, 200, "Post updated", updatedPost);
   } catch (error) {
@@ -86,11 +77,22 @@ const getPost = async (req, res, next) => {
   try {
     const { postId } = req.params;
     //console.log("postId: ", postId);
-    const post = await postModel.findById(postId, "-__v");
+    const post = await postModel
+      .findById(postId, "-__v")
+      .populate("owner", "username profilePic -_id");
     if (!post) {
       return sendErrorResponse(res, 404, "Post not found");
     }
-    return sendSuccessResponse(res, 200, "Post detail", post);
+    const comments = await commentModel
+      .find({ post: postId }, "-post, -_id, -__v")
+      .populate("owner", "username profilePic -_id")
+      .sort({ createdAt: -1 }); // newest comment first
+
+    const result = {
+      post,
+      comments,
+    };
+    return sendSuccessResponse(res, 200, "Post detail", result);
   } catch (error) {
     next(error);
   }
@@ -101,10 +103,12 @@ const getPosts = async (req, res, next) => {
     const id = req.user.id;
     //console.log("id: ", id);
 
-    const userPosts = await postModel.find({ owner: id }, "-__v");
+    const userPosts = await postModel
+      .find({ owner: id }, "-__v")
+      .populate("owner", "username profilePic -_id");
     // console.log("UserPost: ", userPosts);
-    if (!userPosts || userPosts.length === 0) {
-      return sendSuccessResponse(res, 200, "No post", []);
+    if (userPosts.length === 0) {
+      return sendSuccessResponse(res, 200, "No post", {});
     }
     return sendSuccessResponse(res, 200, "Users post", userPosts);
   } catch (error) {

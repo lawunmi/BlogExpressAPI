@@ -1,29 +1,30 @@
-import cloudinary from "../utils/cloudinary.js";
+import cloudinary from "./cloudinary.js";
 import fs from "fs/promises";
-import { sendErrorResponse } from "../utils/response.js";
+import { sendErrorResponse } from "./response.js";
 
-// Single image upload
-export const imageUpload = async (file, name) => {
+// Single media upload logic
+export const singleMediaUpload = async (file, name) => {
   const response = await cloudinary.uploader.upload(file.path, {
-    folder: "Users-Profile",
+    folder: `${name}`,
+    resource_type: "auto",
   });
   const imgUrl = response.secure_url;
   await fs.unlink(file.path);
   return imgUrl;
 };
 
-// Array image upload
-const postImageUpload = async (file, name) => {
-  const uploadedImages = [];
+// Array media upload logic
+const arrayMediaUpload = async (file, name) => {
+  const uploadedMedia = [];
   for (const img of file) {
     const response = await cloudinary.uploader.upload(img.path, {
       folder: `${name}`,
       resource_type: "auto",
     });
-    uploadedImages.push(response.secure_url);
+    uploadedMedia.push(response.secure_url);
     await fs.unlink(img.path);
   }
-  return uploadedImages;
+  return uploadedMedia;
 };
 
 export const postMedia = async (files, count, res, media) => {
@@ -35,7 +36,7 @@ export const postMedia = async (files, count, res, media) => {
         `You can only upload up to ${count} files in a post`
       );
     }
-    const result = await postImageUpload(files, "Post-Media");
+    const result = await arrayMediaUpload(files, "Post-Media");
     media = result.map((file, index) => ({
       postMediaUrl: file,
       postMediaType: files[index].mimetype.startsWith("video")

@@ -15,7 +15,7 @@ const router = express.Router();
 router.post("/createUser", upload.single("profilePic"), createUser);
 router.post("/login", loginUser);
 router.put(
-  "/updateUser/:id",
+  "/updateUser",
   authentication,
   upload.single("profilePic"),
   updateUser

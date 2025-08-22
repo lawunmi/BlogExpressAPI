@@ -5,6 +5,7 @@ import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import userRoutes from "./routes/user.route.js";
 import postRoutes from "./routes/post.route.js";
+import commentRoutes from "./routes/comment.route.js";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.get("/health", (req, res) => {
 
 app.use(userRoutes);
 app.use(postRoutes);
+app.use(commentRoutes);
 
 // Swagger setup
 const swaggerDocument = YAML.load("src/swagger.yaml");

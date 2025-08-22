@@ -2,7 +2,7 @@ import userModel from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/response.js";
 import jwt from "jsonwebtoken";
-import { imageUpload } from "../helpers/mediaHelper.js";
+import { singleMediaUpload } from "../utils/mediaUtil.js";
 
 const createUser = async (req, res, next) => {
   try {
@@ -41,7 +41,11 @@ const createUser = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const imageUrl = await imageUpload(profilePic);
+    // Image upload
+    let imageUrl;
+    if (profilePic) {
+      imageUrl = await singleMediaUpload(profilePic, "UserProfile");
+    }
 
     const newUser = new userModel({
       username,
@@ -130,18 +134,16 @@ const updateUser = async (req, res, next) => {
       return sendErrorResponse(res, 404, "User not found");
     }
 
-    let imageUrl;
+    let imageUrl = user.profilePic;
     if (profilePic) {
-      imageUrl = await imageUpload(profilePic);
-    } else {
-      imageUrl = user.profilePic;
+      imageUrl = await singleMediaUpload(profilePic, "UserProfile");
     }
 
     // Save to database
     const updatedUser = await userModel.findByIdAndUpdate(
       userId,
       { profilePic: imageUrl, ...updates },
-      { new: true }
+      { new: true, runValidators: true }
     );
 
     // Exclude certain fields from response

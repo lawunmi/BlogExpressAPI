@@ -14,6 +14,13 @@ info:
 
     Comment system for blog posts
 
+
+      Note
+
+        Always clear the value used as placeholder(e.g string) and uncheck the "send empty value" option when performing
+        a PUT(update) method to avoid sending string or an empty value except you want to 
+        intentionally update a property to either
+
 paths:
   /createUser:
     post:
@@ -193,6 +200,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
   /getUserByID/{id}:
     get:
       summary: Get user by ID
@@ -245,20 +253,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /updateUser/{id}:
+  /updateUser:
     put:
       summary: Update user by ID
       tags:
         - Users
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          description: The ID of the user to update
       requestBody:
         required: true
         content:
@@ -589,6 +590,112 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /addComment/{postId}:
+    post:
+      summary: Make a comment
+      description: Only 1 media file can be uploaded
+      tags:
+        - Comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+          description: The ID of the post to be commented on
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                commentText:
+                  type: string
+                commentMedia:
+                  type: string
+                  format: binary
+      responses:
+        "201":
+          description: Comment added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - success
+                      - fail
+                    default: success
+                  message:
+                    type: string
+                  result:
+                    $ref: "#/components/schemas/Comment"
+
+        "403":
+          description: Forbidden - invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "404":
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /deleteComment/{id}:
+    delete:
+      summary: Delete comment by ID
+      tags:
+        - Comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the comment
+      responses:
+        "200":
+          description: Comment deleted 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - success
+                      - fail
+                    default: success
+                  message:
+                    type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+
+
 components:
   securitySchemes:
     bearerAuth:
@@ -628,6 +735,20 @@ components:
           items:
             type: string
             format: binary
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    Comment:
+      type: object
+      properties:
+        _id:
+          type: string
+        commentText:
+          type: string
+        commentMedia:
+          type: string
         createdAt:
           type: string
         updatedAt:
