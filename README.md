@@ -32,7 +32,7 @@ posts. Implement user roles, such as admins and regular users.
 | POST        | `/login`              | Login and get JWT     | No            | No                  |
 | GET         | `/getUsers`           | Get all users         | Yes           | Yes                 |
 | GET         | `/getUserByID/:id`    | Get a particular user | Yes           | Yes                 |
-| PUT         | `/updateUser/:id`     | Update user           | Yes           | No                  |
+| PUT         | `/updateUser`         | Update user           | Yes           | No                  |
 | **Post**    |                       |                       |               |
 | POST        | `/newPost`            | Make a new post       | No            | No                  |
 | PUT         | `/updatePost/:postId` | Update a post         | No            | No                  |

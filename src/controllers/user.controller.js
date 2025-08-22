@@ -17,23 +17,15 @@ const createUser = async (req, res, next) => {
       );
     }
 
-    // Check if user with a particular email already exists
-    const existingEmail = await userModel.findOne({ email });
-    if (existingEmail) {
+    // Check if a user exist
+    const existingUser = await userModel.findOne({
+      $or: [{ email }, { username }],
+    });
+    if (existingUser) {
       return sendErrorResponse(
         res,
         409,
-        "A user with this email already exists"
-      );
-    }
-
-    // Check if user with a particular username already exists
-    const existingUsername = await userModel.findOne({ username });
-    if (existingUsername) {
-      return sendErrorResponse(
-        res,
-        409,
-        "A user with this username already exists"
+        "A user with this email or username already exists"
       );
     }
 
