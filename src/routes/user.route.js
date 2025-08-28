@@ -4,7 +4,8 @@ import {
   loginUser,
   updateUser,
   getAllUsers,
-  getUserById,
+  getUser,
+  changePassword,
 } from "../controllers/user.controller.js";
 import upload from "../utils/multer.js";
 import { authentication } from "../middlewares/auth.middleware.js";
@@ -21,6 +22,7 @@ router.put(
   updateUser
 );
 router.get("/getUsers", authentication, adminMiddleware, getAllUsers);
-router.get("/getUserByID/:id", authentication, adminMiddleware, getUserById);
+router.get("/getUser", authentication, getUser);
+router.put("/changePassword", authentication, changePassword);
 
 export default router;

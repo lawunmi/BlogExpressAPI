@@ -201,21 +201,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
-  /getUserByID/{id}:
+  /getUser:
     get:
-      summary: Get user by ID
-      description: Only admin users have access to this endpoint
+      summary: Get user
       tags:
         - Users
       security:
         - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-            description: The ID of the user details to be retrieved
       responses:
         "200":
           description: User found successfully
@@ -235,7 +227,7 @@ paths:
                   result:
                     $ref: "#/components/schemas/User"
         "403":
-          description: Forbidden - User is not an admin
+          description: Invalid token
           content:
             application/json:
               schema:
@@ -268,8 +260,6 @@ paths:
               type: object
               properties:
                 username:
-                  type: string
-                email:
                   type: string
                 profilePic:
                   type: string
@@ -304,6 +294,53 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotFoundError"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /changePassword:
+    put:
+      summary: Change user password
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        "200":
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - success
+                      - fail
+                    default: success
+                  message:
+                    type: string
+        "403":
+          description: invalid token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "500":
           description: Internal Server Error
           content:

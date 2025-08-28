@@ -1,4 +1,4 @@
-# Blog API
+# 📝 Blog API
 
 A Node.js + Express REST API for blogging platform where users can write, edit,
 and delete blog posts. Other users can read and comment on blog
@@ -31,8 +31,9 @@ posts. Implement user roles, such as admins and regular users.
 | POST        | `/createUser`         | Register a new user   | No            | No                  |
 | POST        | `/login`              | Login and get JWT     | No            | No                  |
 | GET         | `/getUsers`           | Get all users         | Yes           | Yes                 |
-| GET         | `/getUserByID/:id`    | Get a particular user | Yes           | Yes                 |
+| GET         | `/getUser`            | Fetch user detail     | Yes           | No                  |
 | PUT         | `/updateUser`         | Update user           | Yes           | No                  |
+| PUT         | `/ChangePasssword`    | Change user password  | Yes           | No                  |
 | **Post**    |                       |                       |               |
 | POST        | `/newPost`            | Make a new post       | No            | No                  |
 | PUT         | `/updatePost/:postId` | Update a post         | No            | No                  |
@@ -42,3 +43,13 @@ posts. Implement user roles, such as admins and regular users.
 | **Comment** |                       |                       |               |
 | POST        | `/addComment`         | Add comment to a post | Yes           | No                  |
 | DELETE      | `/deleteComment/:id`  | Delete a comment      | Yes           | No                  |
+
+src/
+│── config/ # DB connection
+│── controllers/ # Business logic
+│── models/ # Mongoose schemas
+│── routes/ # API routes
+│── middlewares/ # Authentication
+│── utils/ # Helper functions
+│── server.js # Server entry point
+│── swagger.yaml # Documentation for the APIs - URL(localhost:3000/api-docs)

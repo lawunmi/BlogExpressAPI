@@ -158,17 +158,57 @@ const getAllUsers = async (req, res, next) => {
   }
 };
 
-const getUserById = async (req, res, next) => {
+const getUser = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const user = await userModel.findById(id, "-password -__v");
+    const userId = req.user.id;
+
+    const user = await userModel.findById(userId, "-password -__v");
     if (!user) {
       return sendErrorResponse(res, 404, "User not found");
     }
-    return sendSuccessResponse(res, 200, "All users", user);
+    return sendSuccessResponse(res, 200, "User detail", user);
   } catch (error) {
     next(error);
   }
 };
 
-export { createUser, loginUser, updateUser, getAllUsers, getUserById };
+const changePassword = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await userModel.findById(userId);
+
+    // Verify current password
+    const isCurrentPassowrValid = bcrypt.compareSync(
+      currentPassword,
+      user.password
+    );
+    if (!isCurrentPassowrValid) {
+      return sendErrorResponse(res, 400, "Current password is incorrect");
+    }
+
+    // New password hashing
+    const salt = await bcrypt.genSalt(10);
+    const newHashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await userModel.findByIdAndUpdate(
+      userId,
+      { password: newHashedPassword },
+      { new: true }
+    );
+
+    return sendErrorResponse(res, 200, "Password changed successfully!");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export {
+  createUser,
+  loginUser,
+  updateUser,
+  getAllUsers,
+  getUser,
+  changePassword,
+};
